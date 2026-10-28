@@ -30,6 +30,7 @@
 #include "engines/advancedDetector.h"
 #include "engines/engine.h"
 
+#include "saga2/game.h"
 #include "saga2/gfx.h"
 #include "saga2/idtypes.h"
 #include "saga2/weapons.h"
@@ -113,6 +114,7 @@ public:
 	bool hasFeature(EngineFeature f) const override;
 	const ADGameFileDescription *getFilesDescriptions() const;
 	int getGameId() const;
+	const Saga2GameSettings &getGameSettings() const;
 	bool canLoadGameStateCurrently(Common::U32String *msg = nullptr) override { return true; }
 	bool canSaveGameStateCurrently(Common::U32String *msg = nullptr) override { return true; }
 	Common::Error loadGameStream(Common::SeekableReadStream *stream) override;

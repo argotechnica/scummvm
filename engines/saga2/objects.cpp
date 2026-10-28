@@ -2496,8 +2496,9 @@ extern int enchantmentProto;
 //	Load and construct object and actor prototype arrays
 
 void initPrototypes() {
-	const int resourceObjProtoSize = 52;
-	const int resourceActProtoSize = 86;
+	const Saga2GameSettings &settings = g_vm->getGameSettings();
+	const int resourceObjProtoSize = settings.objectProtoRecordSize;
+	const int resourceActProtoSize = settings.actorProtoRecordSize;
 	uint count = 0;
 	Common::SeekableReadStream *stream;
 	Common::String s;
@@ -2618,8 +2619,8 @@ void initPrototypes() {
 
 		case protoClassSkill:
 			pr = new SkillProto(ro);
-			initializeSkill((SkillProto *) pr, ((SkillProto *) pr)->getSpellID());
-			//initializeSkill(i,((SkillProto *) pr)->getSpellID());
+			if (settings.hasSpellBook)
+				initializeSkill((SkillProto *) pr, ((SkillProto *) pr)->getSpellID());
 			break;
 
 		case protoClassIdeaContainer:
@@ -2682,7 +2683,7 @@ void initPrototypes() {
 
 	for (int i = 0; i < actorProtoCount; i++) {
 		ResourceActorPrototype  ra;
-		ra.load(stream);
+		ra.load(stream, settings);
 
 		ActorProto *pr = new ActorProto(ra);
 		g_vm->_actorProtos.push_back(pr);
@@ -2914,8 +2915,8 @@ void cleanupWorlds() {
 //-------------------------------------------------------------------
 //	Initialize the Objects list
 
-ResourceGameObject::ResourceGameObject(Common::SeekableReadStream *stream) {
-	protoIndex = stream->readSint16LE();
+ResourceGameObject::ResourceGameObject(Common::SeekableReadStream *stream, const Saga2GameSettings &settings) {
+	protoIndex = settings.protoIndexSize == 4 ? stream->readSint32LE() : stream->readSint16LE();
 	location.u = stream->readSint16LE();
 	location.v = stream->readSint16LE();
 	location.z = stream->readSint16LE();
@@ -2925,13 +2926,15 @@ ResourceGameObject::ResourceGameObject(Common::SeekableReadStream *stream) {
 	objectFlags = stream->readUint16LE();
 	hitPoints = stream->readByte();
 	misc = stream->readUint16LE();
+	stream->skip(settings.objectReservedBytes);
 }
 
 void initObjects() {
 	int16 i, resourceObjectCount;
 	Common::Array<ResourceGameObject> resourceObjectList;
 	Common::SeekableReadStream *stream;
-	const int resourceGameObjSize = 19;
+	const Saga2GameSettings &settings = g_vm->getGameSettings();
+	const int resourceGameObjSize = settings.objectRecordSize;
 
 	//  Initialize the limbo counts
 	objectLimboCount = 0;
@@ -2956,7 +2959,7 @@ void initObjects() {
 
 	//  Read the resource Objects
 	for (int k = 0; k < resourceObjectCount; ++k) {
-		ResourceGameObject res(stream);
+		ResourceGameObject res(stream, settings);
 		resourceObjectList.push_back(res);
 	}
 

@@ -26,6 +26,7 @@
 #ifndef SAGA2_OBJECTS_H
 #define SAGA2_OBJECTS_H
 
+#include "saga2/game.h"
 #include "saga2/objproto.h"
 #include "saga2/property.h"
 
@@ -61,7 +62,7 @@ enum {
 //  it is structured in the resource file.
 
 struct ResourceGameObject {
-	int16           protoIndex;
+	int32           protoIndex;
 	TilePoint       location;
 	uint16          nameIndex;
 	ObjectID        parentID;
@@ -70,7 +71,7 @@ struct ResourceGameObject {
 	uint8           hitPoints;
 	uint16          misc;
 
-	ResourceGameObject(Common::SeekableReadStream *stream);
+	ResourceGameObject(Common::SeekableReadStream *stream, const Saga2GameSettings &settings);
 };
 
 //  Base class of all objects

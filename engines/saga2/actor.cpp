@@ -3420,10 +3420,11 @@ void setCombatBehavior(bool enabled) {
 //-------------------------------------------------------------------
 //	Initialize the actor list
 
-ResourceActor::ResourceActor(Common::SeekableReadStream *stream) : ResourceGameObject(stream) {
+ResourceActor::ResourceActor(Common::SeekableReadStream *stream, const Saga2GameSettings &settings)
+	: ResourceGameObject(stream, settings) {
 	faction = stream->readByte();
 	colorScheme = stream->readByte();
-	appearanceID = stream->readSint32BE();
+	appearanceID = settings.appearanceBigEndian ? stream->readSint32BE() : stream->readSint32LE();
 	attitude = stream->readSByte();
 	mood = stream->readSByte();
 	disposition = stream->readByte();
@@ -3447,7 +3448,8 @@ void initActors() {
 	int i, resourceActorCount;
 	Common::Array<ResourceActor> resourceActorList;
 	Common::SeekableReadStream *stream;
-	const int resourceActorSize = 91; // size of the packed struct
+	const Saga2GameSettings &settings = g_vm->getGameSettings();
+	const int resourceActorSize = settings.actorRecordSize;
 
 	resourceActorCount = listRes->size(kActorListID)
 	                     / resourceActorSize;
@@ -3460,7 +3462,7 @@ void initActors() {
 
 	//  Read the resource actors
 	for (int k = 0; k < resourceActorCount; ++k) {
-		ResourceActor res(stream);
+		ResourceActor res(stream, settings);
 		resourceActorList.push_back(res);
 	}
 
@@ -3489,9 +3491,11 @@ void initActors() {
 		g_vm->_act->_actorList.push_back(a);
 	}
 
-	g_vm->_act->_actorList[0]->_disposition = kDispositionPlayer + 0;
-	g_vm->_act->_actorList[1]->_disposition = kDispositionPlayer + 1;
-	g_vm->_act->_actorList[2]->_disposition = kDispositionPlayer + 2;
+	if (settings.hasFixedPlayerActors) {
+		g_vm->_act->_actorList[0]->_disposition = kDispositionPlayer + 0;
+		g_vm->_act->_actorList[1]->_disposition = kDispositionPlayer + 1;
+		g_vm->_act->_actorList[2]->_disposition = kDispositionPlayer + 2;
+	}
 }
 
 void saveActors(Common::OutSaveFile *outS) {

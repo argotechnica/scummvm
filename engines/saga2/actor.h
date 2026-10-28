@@ -271,8 +271,14 @@ struct ResourceActorPrototype {
 	ResourceObjectPrototype         proto;  //  Standard prototype data
 	ResourceActorProtoExtension     ext;    //  Extended actor data
 
-	void load(Common::SeekableReadStream *stream) {
-		proto.load(stream);
+	void load(Common::SeekableReadStream *stream, const Saga2GameSettings &settings) {
+		if (settings.actorProtoLayout == kObjectProtoFull) {
+			proto.load(stream);
+		} else {
+			// The object-only fields are absent; proto is default-constructed
+			// with them zeroed.
+			proto.loadCommon(stream);
+		}
 		ext.load(stream);
 	}
 };
@@ -578,7 +584,7 @@ struct ResourceActor : public ResourceGameObject {
 	//  Pad bytes
 	uint8           reserved[18];
 
-	ResourceActor(Common::SeekableReadStream *stream);
+	ResourceActor(Common::SeekableReadStream *stream, const Saga2GameSettings &settings);
 };
 
 class Actor : public GameObject {

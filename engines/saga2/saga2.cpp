@@ -59,6 +59,32 @@ void main_saga2();
 
 Saga2Engine *g_vm;
 
+static const Saga2GameSettings dinoSettings = {
+	4,     // protoIndexSize
+	24,    // objectRecordSize
+	3,     // objectReservedBytes
+	96,    // actorRecordSize
+	52,    // objectProtoRecordSize
+	52,    // actorProtoRecordSize
+	kObjectProtoCommonOnly, // actorProtoLayout
+	false, // appearanceBigEndian
+	false, // hasSpellBook
+	false  // hasFixedPlayerActors
+};
+
+static const Saga2GameSettings fta2Settings = {
+	2,    // protoIndexSize
+	19,   // objectRecordSize
+	0,    // objectReservedBytes
+	91,   // actorRecordSize
+	52,   // objectProtoRecordSize
+	86,   // actorProtoRecordSize
+	kObjectProtoFull, // actorProtoLayout
+	true, // appearanceBigEndian
+	true, // hasSpellBook
+	true  // hasFixedPlayerActors
+};
+
 Saga2Engine::Saga2Engine(OSystem *syst, const SAGA2GameDescription *desc)
 	: Engine(syst), _gameDescription(desc) {
 	const Common::FSNode gameDataDir(ConfMan.getPath("path"));
@@ -193,6 +219,18 @@ bool Saga2Engine::hasFeature(EngineFeature f) const {
 
 int Saga2Engine::getGameId() const {
 	return _gameDescription->gameId;
+}
+
+const Saga2GameSettings &Saga2Engine::getGameSettings() const {
+	const int gameId = getGameId();
+
+	if (gameId == GID_DINO)
+		return dinoSettings;
+	if (gameId == GID_FTA2)
+		return fta2Settings;
+
+	error("Unknown SAGA2 game ID %d", gameId);
+	return fta2Settings;
 }
 
 const ADGameFileDescription *Saga2Engine::getFilesDescriptions() const {

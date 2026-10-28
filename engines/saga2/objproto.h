@@ -327,7 +327,7 @@ struct ResourceObjectPrototype {
 			reserved[i] = proto.reserved[i];
 	}
 
-	void load(Common::SeekableReadStream *stream) {
+	void loadCommon(Common::SeekableReadStream *stream) {
 		classType = stream->readSint16LE();
 		script = stream->readUint16LE();
 		nameIndex = stream->readSint16LE();
@@ -341,6 +341,10 @@ struct ResourceObjectPrototype {
 		bulk = stream->readByte();
 		crossSection = stream->readByte();
 		height = stream->readByte();
+	}
+
+	// Object-only fields; absent from Dinotopia actor prototypes.
+	void loadObjectExtension(Common::SeekableReadStream *stream) {
 		toughness = stream->readByte();
 		breakType = stream->readByte();
 		maxCapacity = stream->readUint16LE();
@@ -365,6 +369,11 @@ struct ResourceObjectPrototype {
 
 		for (int i = 0; i < 7; ++i)
 			reserved[i] = stream->readByte();
+	}
+
+	void load(Common::SeekableReadStream *stream) {
+		loadCommon(stream);
+		loadObjectExtension(stream);
 	}
 };
 
